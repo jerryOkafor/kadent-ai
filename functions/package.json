@@ -1,0 +1,17 @@
+{
+  "name": "kadent-ai-functions",
+  "private": true,
+  "description": "The Cloud Function that holds Kadent's model key and forwards Messages requests to Meta's Model API.",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0"
+  }
+}
