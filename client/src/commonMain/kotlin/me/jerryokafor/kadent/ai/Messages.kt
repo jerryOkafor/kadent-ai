@@ -133,10 +133,25 @@ data class ToolChoice(val type: String) {
 
 /** Where a JSON schema for the answer goes. Meta has no top-level `output_format`. */
 @Serializable
-data class OutputConfig(val format: OutputFormat) {
+data class OutputConfig(val format: OutputFormat? = null, val effort: Effort? = null) {
     companion object {
-        fun jsonSchema(schema: JsonObject) = OutputConfig(OutputFormat(schema = schema))
+        fun jsonSchema(schema: JsonObject, effort: Effort? = null) = OutputConfig(OutputFormat(schema = schema), effort)
     }
+}
+
+/**
+ * How hard the model reasons before it answers. Muse Spark always reasons, and the reasoning is
+ * counted in `max_tokens`: on 2026-10-27 a three-line receipt at Meta's default used 475 of 512
+ * tokens thinking and its JSON was cut off, while [LOW] used 233 and answered in full. Meta's
+ * Messages endpoint refuses turning it off (`thinking: disabled`) and `minimal`, so [LOW] is the
+ * floor. The reasoning itself comes back as a `redacted_thinking` block, kept as
+ * [ContentBlock.Unknown].
+ */
+@Serializable
+enum class Effort {
+    @SerialName("low") LOW,
+    @SerialName("medium") MEDIUM,
+    @SerialName("high") HIGH,
 }
 
 @Serializable

@@ -49,6 +49,16 @@ class MessagesTest {
     }
 
     @Test
+    fun theReasoningEffortIsWrittenBesideTheSchema() {
+        val schema = buildJsonObject { put("type", "object") }
+        val written = AiJson.encodeToJsonElement(OutputConfig.serializer(), OutputConfig.jsonSchema(schema, Effort.LOW))
+        assertEquals(
+            AiJson.parseToJsonElement("""{"effort": "low", "format": {"type": "json_schema", "schema": {"type": "object"}}}"""),
+            written,
+        )
+    }
+
+    @Test
     fun aToolResultIsWrittenWithItsCallsId() {
         val block: ContentBlock = ContentBlock.ToolResult(toolUseId = "call_1", content = "3 left")
         val written = AiJson.encodeToJsonElement(ContentBlock.serializer(), block)
@@ -81,6 +91,28 @@ class MessagesTest {
         assertEquals("rhythm", call.name)
         assertEquals(JsonPrimitive("milk"), call.input["item"])
         assertEquals(Usage(inputTokens = 12, outputTokens = 7), response.usage)
+    }
+
+    @Test
+    fun aMuseSparkAnswerIsReadWithItsReasoningKept() {
+        // The shape Muse Spark returned on 2026-10-27 for a JSON-schema request at low effort, with
+        // the encrypted reasoning cut short. Every answer carries one of these blocks.
+        val response = AiJson.decodeFromString(
+            MessagesResponse.serializer(),
+            """
+            {"content": [
+               {"data": "Q-PaDgFT0fl4", "type": "redacted_thinking"},
+               {"text": "{\"store\":\"NO FRILLS\",\"total\":9.78}", "type": "text"}
+             ],
+             "id": "msg_6ae16caf", "model": "muse-spark-1.3", "role": "assistant",
+             "stop_reason": "end_turn", "stop_sequence": null, "type": "message",
+             "usage": {"cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "input_tokens": 45,
+                       "output_tokens": 285, "output_tokens_details": {"thinking_tokens": 233}}}
+            """,
+        )
+
+        assertEquals("redacted_thinking", assertIs<ContentBlock.Unknown>(response.content[0]).type)
+        assertEquals(JsonPrimitive("NO FRILLS"), response.json()["store"])
     }
 
     @Test
