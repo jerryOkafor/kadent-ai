@@ -80,7 +80,9 @@ export function createHandler(deps) {
     try {
       upstream = await deps.fetch(META_MESSAGES_URL, {
         method: "POST",
-        headers: { authorization: `Bearer ${deps.apiKey()}`, "content-type": "application/json", "anthropic-version": "2023-06-01" },
+        // Trimmed: a key piped into `secrets:set` by `echo` is stored with its newline, and Meta
+        // refuses `key\n` with a 401 that reads like a revoked key.
+        headers: { authorization: `Bearer ${deps.apiKey().trim()}`, "content-type": "application/json", "anthropic-version": "2023-06-01" },
         body: JSON.stringify(forwarded),
         signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       });

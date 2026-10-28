@@ -126,6 +126,23 @@ test("an allowed request goes to Meta's Messages endpoint with the key as a bear
   assert.equal(calls[0].body.messages[0].content, PROMPT);
 });
 
+test("a key stored with whitespace around it is sent without it", async () => {
+  const calls = [];
+  const handler = createHandler({
+    apiKey: () => `  ${KEY}\n`,
+    verifyIdToken: async () => ({ uid: "user-1" }),
+    takeQuota: async () => ({ allowed: true }),
+    fetch: async (url, init) => {
+      calls.push(init);
+      return jsonResponse(200, { id: "msg_1", content: [] });
+    },
+    log: () => {},
+    now: () => 0,
+  });
+  await handler(request());
+  assert.equal(calls[0].headers.authorization, `Bearer ${KEY}`);
+});
+
 test("fields the function does not pass on are dropped before forwarding", async () => {
   const { handler, calls } = setup();
   await handler(request({ metadata: { user_id: "someone" }, output_config: { format: { type: "json_schema", schema: {} } } }));
