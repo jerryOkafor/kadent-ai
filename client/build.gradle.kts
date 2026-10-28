@@ -45,4 +45,6 @@ kotlin {
 
 publishing {
     repositories { mavenLocal() }
+    // Published as kadent-ai-client (and -jvm, -android, ...), not as the folder's bare name.
+    publications.withType<MavenPublication>().configureEach { artifactId = "kadent-ai-$artifactId" }
 }

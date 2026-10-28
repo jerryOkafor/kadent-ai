@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 }
 
 include(":client")
+include(":receipt")
