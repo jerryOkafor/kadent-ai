@@ -14,11 +14,11 @@ depends on it as a library.
 | Path | What it does |
 |---|---|
 | [`functions/`](functions) | `ai`, a Firebase Cloud Function and the only place the model key lives. A phone sends a Messages request with the person's Firebase ID token. The function checks the token, the model, the size and the person's quota, forwards the request to Meta's Model API, and returns the answer. It logs that a call happened, never what was in it. |
-| [`client/`](client) | `kadent-ai-client`, a Kotlin Multiplatform library for Android, iOS, desktop and Web. It sends Messages requests through the function, refreshes an expired sign-in once, and waits out a short rate limit before giving up. |
+| [`client/`](client) | `kadent-ai-client`, a Kotlin Multiplatform library for Android, iOS, desktop and Web. It sends Messages requests through the function, refreshes an expired sign-in once, and waits out a short rate limit before giving up. Its `ToolLoop` runs an agent: it runs each tool the model calls and sends the answers back until one call finishes the run. |
 | [`receipt/`](receipt) | `kadent-ai-receipt`. Reads a receipt's photos or PDF with Muse Spark into structured lines: the till's text and a clean name ("SHRD CHEDDAR 16Z" is "Shredded cheddar · 16oz"), counts, weights, codes, an aisle and a budget envelope from the household's own lists, taxes by kind, fees, deposits and totals, all in exact cents. It also measures how far the reading is from the printed total. |
+| [`planner/`](planner) | `kadent-ai-planner`. An agent that drafts a shopping list's next trip. Muse Spark reads the household's rows and buying rhythm, store prices and budget through read-only tools, and proposes the trip with a one-line reason for each item. Every item due by the household's rhythm stays on the draft. The person can ask for a change in a sentence. |
 
-Coming next, tracked in Kadent's epic: filing a clean receipt with nothing to fix, an agent that plans next week's list, and a
-script that scores each reader on the same receipts.
+Coming next, tracked in Kadent's epic: a script that scores each reader on the same receipts.
 
 ## Privacy rules this code keeps
 
@@ -30,7 +30,7 @@ script that scores each reader on the same receipts.
 
 ```bash
 (cd functions && npm ci && npm test)      # the function's tests
-./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest   # the Kotlin tests
+./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest :kadent-ai-planner:jvmTest   # the Kotlin tests
 ```
 
 `AGENTS.md` has the deploy commands and the rules for working in this repo.

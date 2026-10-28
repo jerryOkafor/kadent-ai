@@ -13,8 +13,9 @@ beside the code that makes it.
 | Path | What it is |
 |---|---|
 | `functions/` | The Cloud Function `ai`: the only place the model key lives. A phone posts a Messages request with its Firebase ID token; the function checks the user, the model and the user's quota, forwards the request to Meta's Model API, and returns the answer. |
-| `client/` | `kadent-ai-client`, a Kotlin Multiplatform library (Android, JVM, iOS, Web) that phones use to call the function. Its request and response types follow Anthropic's Messages format, which Meta's Model API accepts. |
+| `client/` | `kadent-ai-client`, a Kotlin Multiplatform library (Android, JVM, iOS, Web) that phones use to call the function. Its request and response types follow Anthropic's Messages format, which Meta's Model API accepts. `ToolLoop` runs an agent until a tool call finishes it. |
 | `receipt/` | `kadent-ai-receipt`: `ReceiptReader` reads a receipt's photos or PDF with Muse Spark into a `ReadReceipt`, with each line's clean name, aisle and envelope, the taxes and charges, and `ReceiptChecks`, how far the reading is from the printed total. |
+| `planner/` | `kadent-ai-planner`: `TripPlanner` drafts a list's next trip through four tools over `PlannerData`, which Kadent implements: `list_items`, `price_history` and `budget_left` read data, and `propose_trip` is the answer. It checks the draft, puts back any due row the model left out, and `revise` applies a change the person asks for in a sentence. |
 | `scripts/draw-receipt.swift` | Draws a synthetic receipt as a tilted JPEG for the tests. Real receipts never go in this repo. |
 
 ## Rules that come first
@@ -33,8 +34,9 @@ beside the code that makes it.
 
 ```bash
 (cd functions && npm ci && npm test)            # the function's tests, no network, no emulator
-./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest     # the Kotlin tests, no network
+./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest :kadent-ai-planner:jvmTest     # the Kotlin tests, no network
 META_MODEL_API_KEY=... ./gradlew :kadent-ai-receipt:jvmTest --tests '*LiveReadingTest*'   # one real read; report in receipt/build/live-reading.txt
+META_MODEL_API_KEY=... ./gradlew :kadent-ai-planner:jvmTest --tests '*LivePlanningTest*'  # one real plan and revision; report in planner/build/live-planning.txt
 ./gradlew publishToMavenLocal                   # what Kadent resolves both libraries from (~/.m2)
 gitleaks detect                                 # before every push
 ```
