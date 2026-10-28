@@ -1,0 +1,21 @@
+[versions]
+# Kotlin is the compiler Kadent builds with. A klib written by a newer compiler is not guaranteed
+# to be readable by an older one, so this moves only when Kadent's does.
+kotlin = "2.5.0-Beta2"
+agp = "9.1.1"
+# Ktor, coroutines and serialization are Kadent's versions too, so the app resolves one copy of each.
+ktor = "3.6.0"
+coroutines = "1.11.0"
+serialization = "1.11.0"
+
+[libraries]
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
