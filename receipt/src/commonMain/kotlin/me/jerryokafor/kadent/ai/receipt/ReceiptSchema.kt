@@ -35,10 +35,13 @@ object ReceiptSchema {
         - till_text: the item line as printed, abbreviations and all, with the count or weight.
         - name: what the item is in plain words a shopper would write on a list, with its size after
           " · " when printed: SHRD CHEDDAR 16Z is "Shredded cheddar · 16oz", KS ORG CORN is
-          "Kirkland Signature organic corn". Do not add a brand or size that is not printed.
+          "Kirkland Signature organic corn". Spell out store brands: PC is President's Choice, NN is
+          No Name, KS is Kirkland Signature, GV is Great Value. Write sizes in lower case with a
+          space: "12 × 355 mL", "4 L", "6 rolls". Do not add a brand or size that is not printed.
         - price: the line's total as printed on the right. quantity: how many the line counted, 1
           when it printed no count; a weighed line is 1. unit_price and unit_label: the shelf price
-          and its unit (ea, lb, kg) when printed. weight: the weighed amount as printed.
+          and its unit (ea, lb, kg) when printed. weight: the weighed number alone, "1.12", with its
+          unit in unit_label.
         - code: the product code printed on the line, digits only. plu: a 4 or 5 digit produce
           sticker number printed with the item.
         - A void, refund or coupon line is its own entry with void true and a negative price.
