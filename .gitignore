@@ -1,0 +1,23 @@
+# Secrets and private data never enter this public repo (AGENTS.md, "What never goes in").
+.env
+.env.*
+*.p8
+google-services.json
+GoogleService-Info.plist
+receipts-private/
+
+# Node
+node_modules/
+firebase-debug.log
+database-debug.log
+
+# Gradle and Kotlin
+.gradle/
+build/
+.kotlin/
+local.properties
+
+# IDEs and the OS
+.idea/
+*.iml
+.DS_Store
