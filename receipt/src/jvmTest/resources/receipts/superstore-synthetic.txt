@@ -1,0 +1,33 @@
+     REAL CANADIAN SUPERSTORE #1517
+          4410 17 ST NW
+       EDMONTON AB  T6T 0C1
+          (780) 555-0142
+
+21-DAIRY
+068700115004 SHRD CHEDDAR 16Z      6.99
+05870322 PC 2% MILK 4L             5.79
+27-PRODUCE
+4048 LIMES
+  4 @ 0.30                         1.20
+4011 BANANAS
+  1.12 kg @ $1.52/kg               1.70
+31-GROCERY
+06038318 NN ORG CORN FLAKES        4.49
+06700000 COKE 12PK 355ML        GC 8.99
+  DEPOSIT 12X355ML                 1.20
+  ENVIRO FEE                       0.12
+35-HOUSEHOLD
+BOUNTY PAPER TWL 6RL            GC 12.99
+VOID BOUNTY PAPER TWL 6RL       GC -12.99
+PURELL HAND SANI 236ML          GC 4.99
+
+SUBTOTAL                          35.47
+GST 5%                             0.70
+TOTAL                             36.17
+
+VISA TEND                         36.17
+CHANGE                             0.00
+PC OPTIMUM POINTS EARNED            340
+
+2026/10/25  14:32   TRM 14  TRN 0333
+      THANK YOU FOR SHOPPING WITH US
