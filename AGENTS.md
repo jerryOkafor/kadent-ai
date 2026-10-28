@@ -33,8 +33,8 @@ beside the code that makes it.
 
 ```bash
 (cd functions && npm ci && npm test)            # the function's tests, no network, no emulator
-./gradlew :client:jvmTest :receipt:jvmTest     # the Kotlin tests, no network
-META_MODEL_API_KEY=... ./gradlew :receipt:jvmTest --tests '*LiveReadingTest*'   # one real read; report in receipt/build/live-reading.txt
+./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest     # the Kotlin tests, no network
+META_MODEL_API_KEY=... ./gradlew :kadent-ai-receipt:jvmTest --tests '*LiveReadingTest*'   # one real read; report in receipt/build/live-reading.txt
 ./gradlew publishToMavenLocal                   # what Kadent resolves both libraries from (~/.m2)
 gitleaks detect                                 # before every push
 ```

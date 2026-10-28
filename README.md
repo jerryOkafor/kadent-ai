@@ -30,7 +30,7 @@ script that scores each reader on the same receipts.
 
 ```bash
 (cd functions && npm ci && npm test)      # the function's tests
-./gradlew :client:jvmTest :receipt:jvmTest   # the Kotlin tests
+./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest   # the Kotlin tests
 ```
 
 `AGENTS.md` has the deploy commands and the rules for working in this repo.

@@ -25,7 +25,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // api: ReceiptReader takes an AiClient.
-            api(project(":client"))
+            api(project(":kadent-ai-client"))
         }
         jvmTest.dependencies {
             implementation(kotlin("test"))
@@ -38,5 +38,4 @@ kotlin {
 
 publishing {
     repositories { mavenLocal() }
-    publications.withType<MavenPublication>().configureEach { artifactId = "kadent-ai-$artifactId" }
 }

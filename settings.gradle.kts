@@ -17,5 +17,9 @@ dependencyResolutionManagement {
     }
 }
 
-include(":client")
-include(":receipt")
+// Each project is named as it is published, kadent-ai-<folder>. Renaming the publications instead
+// misses the iOS and Web ones, which Kotlin names after that rename has run.
+include(":kadent-ai-client")
+project(":kadent-ai-client").projectDir = file("client")
+include(":kadent-ai-receipt")
+project(":kadent-ai-receipt").projectDir = file("receipt")

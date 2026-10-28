@@ -16,7 +16,7 @@ import kotlin.time.Duration.Companion.minutes
  * Reads the synthetic receipt with the real Muse Spark. Runs only when `META_MODEL_API_KEY` is set,
  * so an ordinary run makes no network call and costs nothing:
  *
- *     META_MODEL_API_KEY=... ./gradlew :receipt:jvmTest --tests '*LiveReadingTest*'
+ *     META_MODEL_API_KEY=... ./gradlew :kadent-ai-receipt:jvmTest --tests '*LiveReadingTest*'
  *
  * It calls Meta directly rather than through the `ai` function: FunctionAiClient sends its token as
  * a bearer token, which is exactly how Meta takes its key, and the function only adds sign-in and a
