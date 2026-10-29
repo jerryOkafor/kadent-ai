@@ -277,3 +277,23 @@ class MoneyTest {
         }
     }
 }
+
+/** `ReceiptDate.parse`: what the model writes for `bought_at`, read as the store's clock. */
+class ReceiptDateTest {
+    /** A till's seconds, a space for the `T`, or a zone the model added keep the day and minute (#274's scores lost 15 dates). */
+    @Test
+    fun aTimeWithSecondsKeepsItsDayAndMinute() {
+        val expected = ReceiptDate(2026, 10, 25, 18, 19)
+        for (text in listOf("2026-10-25T18:19", "2026-10-25T18:19:31", "2026-10-25 18:19:31", "2026-10-25T18:19:31.000", "2026-10-25T18:19:31Z", "2026-10-25T18:19-06:00")) {
+            assertEquals(expected, ReceiptDate.parse(text), text)
+        }
+        assertEquals(ReceiptDate(2026, 10, 25), ReceiptDate.parse("2026-10-25"))
+    }
+
+    @Test
+    fun aDateThatIsNotOneIsNone() {
+        for (bad in listOf("25/10/2026", "2026-13-01", "2026-10-25T25:00", "2026-10-25T18", "October 25", "")) {
+            assertNull(ReceiptDate.parse(bad), bad)
+        }
+    }
+}
