@@ -39,7 +39,9 @@ object ReceiptSchema {
           No Name, KS is Kirkland Signature, GV is Great Value. Write sizes in lower case with a
           space: "12 × 355 mL", "4 L", "6 rolls". Do not add a brand or size that is not printed.
         - price: the line's total as printed on the right. quantity: how many the line counted, 1
-          when it printed no count; a weighed line is 1. unit_price and unit_label: the shelf price
+          when it printed no count; a weighed line is 1. A digit or letter printed after the price is
+          the line's tax code, never a count: Costco's 1234567 RED WINE 750ML 19.99 2 is one bottle at
+          19.99. A count is printed with @ or AT. unit_price and unit_label: the shelf price
           and its unit (ea, lb, kg) when printed. weight: the weighed number alone, "1.12", with its
           unit in unit_label.
         - code: the product code printed on the line, digits only. plu: a 4 or 5 digit produce
@@ -57,7 +59,8 @@ object ReceiptSchema {
 
         Every amount is text with two decimals and no currency sign: "5.49", "-2.00".
         bought_at is the printed date and time as 2026-10-25T14:32, without seconds, or just the day when
-        no time is printed. postal_code is upper case with one space.
+        no time is printed. Real Canadian Superstore prints a two-digit year first: 26/09/22 is
+        2026-09-22, never 2022-09-26. postal_code is upper case with one space.
         If the image is not a till receipt, answer is_receipt false with no lines.
     """.trimIndent()
 
