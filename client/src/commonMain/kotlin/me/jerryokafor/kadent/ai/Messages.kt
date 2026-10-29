@@ -121,7 +121,10 @@ data class Tool(
     @SerialName("input_schema") val inputSchema: JsonObject,
 )
 
-/** `auto`, `any` or `none`. Meta ignores a named tool here, so a specific tool cannot be forced. */
+/**
+ * `auto`, `any` or `none` in the Messages API. **Meta's API accepts only `auto`**: it refuses `any`, `none`
+ * and a named tool ("only `auto` is supported for `tool_choice`", #309), so a specific tool cannot be forced.
+ */
 @Serializable
 data class ToolChoice(val type: String) {
     companion object {

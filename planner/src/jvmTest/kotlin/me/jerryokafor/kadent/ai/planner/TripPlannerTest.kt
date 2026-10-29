@@ -77,13 +77,13 @@ class TripPlannerTest {
     }
 
     @Test
-    fun theRequestOffersTheFourToolsAndMakesEveryTurnCallOne() = runTest {
+    fun theRequestOffersTheFourToolsAndLeavesTheChoiceToTheModel() = runTest {
         val ai = Scripted(listOf(proposal("a", "milk" to "due")))
         TripPlanner(ai).draft("Weekly groceries", data)
 
         val request = ai.sent.single()
         assertEquals(listOf("list_items", "price_history", "budget_left", "propose_trip"), request.tools?.map { it.name })
-        assertEquals(ToolChoice.ANY, request.toolChoice)
+        assertEquals(ToolChoice.AUTO, request.toolChoice)
         assertEquals(Effort.LOW, request.outputConfig?.effort)
         assertTrue("Weekly groceries" in (request.messages.single().content.single() as ContentBlock.Text).text)
     }
