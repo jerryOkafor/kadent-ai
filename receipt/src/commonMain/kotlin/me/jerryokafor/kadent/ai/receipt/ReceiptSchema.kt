@@ -60,7 +60,8 @@ object ReceiptSchema {
         Every amount is text with two decimals and no currency sign: "5.49", "-2.00".
         bought_at is the printed date and time as 2026-10-25T14:32, without seconds, or just the day when
         no time is printed. Real Canadian Superstore prints a two-digit year first: 26/09/22 is
-        2026-09-22, never 2022-09-26. postal_code is upper case with one space.
+        2026-09-22, never 2022-09-26. Costco prints the month first: 06/09/2026 is 2026-06-09, never
+        2026-09-06. postal_code is upper case with one space.
         If the image is not a till receipt, answer is_receipt false with no lines.
     """.trimIndent()
 
