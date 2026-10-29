@@ -77,11 +77,18 @@ data class ReceiptDate(val year: Int, val month: Int, val day: Int, val hour: In
     val isoDay: String get() = "$year-${month.pad()}-${day.pad()}"
 
     companion object {
-        private val ISO = Regex("""(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?""")
+        /**
+         * The day, then the time if any, **seconds and a zone accepted and dropped**. Most tills print
+         * `18:19:31`, and the model copies it more often than not: the strict form lost 15 of 45 dates
+         * in the reader scores (#274), and an undated receipt is counted on the day it is filed. The
+         * seconds are dropped because the app keeps the minute; a `Z` or an offset is dropped because
+         * the time is the store's clock as printed, never converted.
+         */
+        private val ISO = Regex("""(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?""")
 
-        /** `2026-10-25` or `2026-10-25T14:32`; null for anything else, or a day that cannot exist. */
+        /** `2026-10-25`, `2026-10-25T14:32` or `2026-10-25T14:32:07`; null for anything else, or a day that cannot exist. */
         fun parse(text: String): ReceiptDate? {
-            val match = ISO.matchEntire(text) ?: return null
+            val match = ISO.matchEntire(text.trim()) ?: return null
             val (y, mo, d, h, mi) = match.destructured
             val date = ReceiptDate(y.toInt(), mo.toInt(), d.toInt(), h.toIntOrNull(), mi.toIntOrNull())
             val valid = date.month in 1..12 && date.day in 1..31 &&

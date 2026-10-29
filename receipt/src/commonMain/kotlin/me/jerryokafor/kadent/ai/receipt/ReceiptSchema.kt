@@ -56,8 +56,8 @@ object ReceiptSchema {
         - subtotal and total as printed.
 
         Every amount is text with two decimals and no currency sign: "5.49", "-2.00".
-        bought_at is the printed date and time as 2026-10-25T14:32, or just the day when no time is
-        printed. postal_code is upper case with one space.
+        bought_at is the printed date and time as 2026-10-25T14:32, without seconds, or just the day when
+        no time is printed. postal_code is upper case with one space.
         If the image is not a till receipt, answer is_receipt false with no lines.
     """.trimIndent()
 
