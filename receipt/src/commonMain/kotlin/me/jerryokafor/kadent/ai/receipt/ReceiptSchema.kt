@@ -33,6 +33,8 @@ object ReceiptSchema {
         - One entry per priced item line. A count (LIMES 4 @ 0.30) or a weight
           (BANANAS 1.12 kg @ 1.52/kg) is part of its item's line, never a line of its own.
         - till_text: the item line as printed, abbreviations and all, with the count or weight.
+          Tills shorten words by dropping their vowels (BRWN, UNSWT, SDLS), so an unclear letter in
+          such a word is more likely W or D than U, V or O.
         - name: what the item is in plain words a shopper would write on a list, with its size after
           " · " when printed: SHRD CHEDDAR 16Z is "Shredded cheddar · 16oz", KS ORG CORN is
           "Kirkland Signature organic corn". Spell out store brands: PC is President's Choice, NN is
@@ -41,11 +43,19 @@ object ReceiptSchema {
         - price: the line's total as printed on the right. quantity: how many the line counted, 1
           when it printed no count; a weighed line is 1. A digit or letter printed after the price is
           the line's tax code, never a count: Costco's 1234567 RED WINE 750ML 19.99 2 is one bottle at
-          19.99. A count is printed with @ or AT. unit_price and unit_label: the shelf price
-          and its unit (ea, lb, kg) when printed. weight: the weighed number alone, "1.12", with its
-          unit in unit_label.
+          19.99. A count is printed with @ or AT, and the count times its unit price is the line's
+          price. Costco prints a count on its own row above the item it counts: 3 @ 4.99 over
+          1234567 DISH SOAP 14.97 is three at 4.99, never a count of the item above it.
+          unit_price and unit_label: the shelf price and its unit (ea, lb, kg) when printed. weight:
+          the weighed number alone, "1.12", with its unit in unit_label.
         - code: the product code printed on the line, digits only. plu: a 4 or 5 digit produce
           sticker number printed with the item.
+        - Loblaw prints each product of one multi-buy on its own unpriced row, with a mark such as
+          (1) before its code, then one deal row, 2 @ 2/$5.00 5.00. That is one entry per product,
+          quantity 1, each at an even share of the deal's total, the last taking any odd cent.
+        - A fuel pump receipt is one line: its till_text is the grade printed after Grade:
+          (Regular, Premium, Diesel), and its price is the Fuel Sale amount. Its GST Included is a
+          tax entry, and its subtotal is null.
         - A void, refund or coupon line is its own entry with void true and a negative price.
         - Not lines: payment lines (VISA, DEBIT, CASH, CHANGE), loyalty points, savings summaries,
           subtotal, tax, total, recycling fees and container deposits.
