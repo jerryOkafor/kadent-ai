@@ -33,6 +33,8 @@ object ReceiptSchema {
         - One entry per priced item line. A count (LIMES 4 @ 0.30) or a weight
           (BANANAS 1.12 kg @ 1.52/kg) is part of its item's line, never a line of its own.
         - till_text: the item line as printed, abbreviations and all, with the count or weight.
+          Tills shorten words by dropping their vowels (BRWN, UNSWT, SDLS), so an unclear letter in
+          such a word is more likely W or D than U, V or O.
         - name: what the item is in plain words a shopper would write on a list, with its size after
           " · " when printed: SHRD CHEDDAR 16Z is "Shredded cheddar · 16oz", KS ORG CORN is
           "Kirkland Signature organic corn". Spell out store brands: PC is President's Choice, NN is
@@ -41,11 +43,21 @@ object ReceiptSchema {
         - price: the line's total as printed on the right. quantity: how many the line counted, 1
           when it printed no count; a weighed line is 1. A digit or letter printed after the price is
           the line's tax code, never a count: Costco's 1234567 RED WINE 750ML 19.99 2 is one bottle at
-          19.99. A count is printed with @ or AT. unit_price and unit_label: the shelf price
-          and its unit (ea, lb, kg) when printed. weight: the weighed number alone, "1.12", with its
-          unit in unit_label.
+          19.99. A count is printed with @ or AT, and the count times its unit price is the line's
+          price. Costco prints a count on its own row above the item it counts: 3 @ 4.99 over
+          1234567 DISH SOAP 14.97 is three at 4.99, never a count of the item above it.
+          unit_price and unit_label: the shelf price and its unit (ea, lb, kg) when printed. weight:
+          the weighed number alone, "1.12", with its unit in unit_label.
         - code: the product code printed on the line, digits only. plu: a 4 or 5 digit produce
           sticker number printed with the item.
+        - Loblaw prints each product of one multi-buy on its own unpriced row with its count in
+          brackets before its code, then one deal row: (1)06038300001 PC CRACKERS and
+          (1)06038300002 NN CHIPS over 2 @ 2/$5.00 5.00. Each product is one entry, quantity its
+          bracketed count, at its share of the deal's total by that count, so these two are 2.50
+          each, and (3)06038300003 PC EGGS over 3 @ $6.99 20.97 is one entry of three at 20.97.
+        - A fuel pump receipt is one line: its till_text is the grade printed after Grade:
+          (Regular, Premium, Diesel), and its price is the Fuel Sale amount. Its GST Included is a
+          tax entry, and its subtotal is null.
         - A void, refund or coupon line is its own entry with void true and a negative price.
         - Not lines: payment lines (VISA, DEBIT, CASH, CHANGE), loyalty points, savings summaries,
           subtotal, tax, total, recycling fees and container deposits.
@@ -61,7 +73,8 @@ object ReceiptSchema {
         bought_at is the printed date and time as 2026-10-25T14:32, without seconds, or just the day when
         no time is printed. Real Canadian Superstore prints a two-digit year first: 26/09/22 is
         2026-09-22, never 2022-09-26. Costco prints the month first: 06/09/2026 is 2026-06-09, never
-        2026-09-06. postal_code is upper case with one space.
+        2026-09-06. Walmart prints the month first too, with a two-digit year: 03/04/26 is 2026-03-04,
+        never 2026-04-03. postal_code is upper case with one space.
         If the image is not a till receipt, answer is_receipt false with no lines.
     """.trimIndent()
 
