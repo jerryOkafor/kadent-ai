@@ -83,14 +83,16 @@ class KadentAsker(private val ai: AiClient, private val model: String = Models.S
      * person", and the question follows it. Figures read for the last answer can be cited again.
      */
     suspend fun followUp(session: AskSession, question: String, data: AskData, onStep: (AskStep) -> Unit = {}): AskOutcome {
-        // Every call of the turn that answered gets a result, as the API requires: the loop stopped at
-        // `answer`, so a call made beside it in the same turn was never run.
+        // Every call of the turn that answered gets a result, as the API requires. The loop runs a turn's calls
+        // in order and stopped at `answer`: a call before it ran (its figures can be cited) but its result was
+        // never sent; a call after it never ran.
         val calls = session.messages.last().content.filterIsInstance<ContentBlock.ToolUse>()
-        val results = calls.map { call ->
-            if (call.id == session.answerCall.id) {
-                ContentBlock.ToolResult(call.id, "Shown to the person. They asked next, below.")
-            } else {
-                ContentBlock.ToolResult(call.id, "Not run: answer ended the turn.", isError = true)
+        val answeredAt = calls.indexOfFirst { it.id == session.answerCall.id }
+        val results = calls.mapIndexed { index, call ->
+            when {
+                index == answeredAt -> ContentBlock.ToolResult(call.id, "Shown to the person. They asked next, below.")
+                index < answeredAt -> ContentBlock.ToolResult(call.id, "Ran beside answer; its result was not returned. Call it again to read it.")
+                else -> ContentBlock.ToolResult(call.id, "Not run: answer ended the turn.", isError = true)
             }
         }
         val next = Message(Role.USER, results + ContentBlock.Text(question))
@@ -278,8 +280,10 @@ class KadentAsker(private val ai: AiClient, private val model: String = Models.S
         /** A sum's label is a heading on a row, "Snacks at Costco", not a sentence. */
         private const val MAX_LABEL = 40
 
-        private val MONTH = Regex("""\d{4}-\d{2}""")
-        private val DAY = Regex("""\d{4}-\d{2}-\d{2}""")
+        // A real month and day, not only their shape: Kadent names a month by its number, so a "2026-13" from
+        // the model would index past December when the sheet words it.
+        private val MONTH = Regex("""\d{4}-(0[1-9]|1[0-2])""")
+        private val DAY = Regex("""\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])""")
 
         val SYSTEM = """
             You answer a Canadian household's questions about its own spending, receipts and tax, for a
@@ -352,7 +356,8 @@ class KadentAsker(private val ai: AiClient, private val model: String = Models.S
             ),
             Tool(
                 TAX_PAID,
-                "Tax the household's receipts printed in a span of days, by kind (GST, HST, PST, QST, Other) and " +
+                "Tax the household's receipts printed in a span of days, by kind (GST, HST, PST, QST, FEES for " +
+                    "recycling fees, DEPOSIT for container deposits, OTHER) and " +
                     "month, and the total.",
                 schema(required = listOf("from", "through")) {
                     string("from", "First day, like 2026-01-01")
@@ -452,6 +457,9 @@ internal fun check(written: Written, figures: Figures): Checked {
     if (STUCK.containsMatchIn(written.text) || writesMoney(PLACEHOLDER.replace(written.text, " "))) {
         return Checked.Bad("The text writes an amount itself. Write every amount as {id}.")
     }
+    if (MISSHAPEN.containsMatchIn(PLACEHOLDER.replace(written.text, " "))) {
+        return Checked.Bad("An id is written wrong. Write each as {f3}: braces, a lower-case f, no spaces.")
+    }
     val parts = mutableListOf<AnswerPart>()
     var at = 0
     for (match in PLACEHOLDER.findAll(written.text)) {
@@ -466,16 +474,23 @@ internal fun check(written: Written, figures: Figures): Checked {
 
 private val PLACEHOLDER = Regex("""\{(f\d+)\}""")
 
-/** A digit against an id, `{f3}0` or `2{f3}`, which would draw as `$148.620`. */
-private val STUCK = Regex("""\d\{f\d+\}|\{f\d+\}\d""")
+/**
+ * A digit, a dollar sign or decimals against an id, `{f3}0`, `2{f3}`, `${f3}` or `{f3}.50`, which would draw
+ * as `$148.620`, `$$148.62` or `$148.62.50`. A sentence's own comma or full stop after an id is fine.
+ */
+private val STUCK = Regex("""[\d$]\{f\d+\}|\{f\d+\}[.,]?\d""")
+
+/** Left after the well-formed ids are taken out: any brace, or an id typed bare (`f3`), would be drawn as typed. */
+private val MISSHAPEN = Regex("""[{}]|\bf\d+\b""")
 
 /**
- * Money, or a figure, written as text: `$12`, `$-12`, `12 dollars`, `CAD 12`, `1,204`, `12.50`, `17%`.
+ * Money, or a figure, written as text: `$12`, `$-12`, `12 $` (as French writes it), `12 dollars`, `CAD 12`,
+ * `1,204`, `12.50`, `17%`.
  * Counts ("14 lines"), days ("Oct 4") and years are words. A quantity with two decimals ("1.13 kg") is
  * refused too, the price of catching `12.50`; the model is sent back once and can write it in words.
  */
 private val MONEY = Regex(
-    """\$\s?-?\d|\d\s?(dollars?|cents?|bucks)\b|\b(CAD|USD)\s?\d|\d,\d{3}|\d[.,]\d{2}\b|\d\s?%""",
+    """\$\s?-?\d|\d\s?\$|\d\s?(dollars?|cents?|bucks)\b|\b(CAD|USD)\s?\d|\d,\d{3}|\d[.,]\d{2}\b|\d\s?%""",
     RegexOption.IGNORE_CASE,
 )
 

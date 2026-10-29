@@ -292,17 +292,25 @@ class KadentAskerTest {
     fun aFollowUpAnswersEveryCallOfTheTurnThatAnswered() = runTest {
         val ai = Scripted(
             listOf(october),
-            listOf(call("b", KadentAsker.RECEIPTS, "from" to "2026-10-01", "through" to "2026-10-28"), answer("c", "{f6} so far.")),
-            listOf(answer("d", "{f3}.")),
+            listOf(
+                call("b", KadentAsker.RECEIPTS, "from" to "2026-10-01", "through" to "2026-10-28"),
+                answer("c", "{f6} so far."),
+                call("d", KadentAsker.TAX_PAID, "from" to "2026-10-01", "through" to "2026-10-28"),
+            ),
+            listOf(answer("e", "{f3}.")),
         )
         val asker = KadentAsker(ai)
         val first = assertIs<AskOutcome.Answered>(asker.ask("October?", Household()))
 
         asker.followUp(first.session, "And groceries?", Household())
 
+        // The loop ran the turn's calls in order and stopped at answer: the call before it ran, the one after did not.
         val results = ai.sent[2].messages.last().content.filterIsInstance<ContentBlock.ToolResult>()
-        assertEquals(listOf("b", "c"), results.map { it.toolUseId })
-        assertEquals(true, results.first().isError)
+        assertEquals(listOf("b", "c", "d"), results.map { it.toolUseId })
+        assertEquals(null, results[0].isError)
+        assertTrue(results[0].content.startsWith("Ran beside answer"), results[0].content)
+        assertEquals(true, results[2].isError)
+        assertEquals("Not run: answer ended the turn.", results[2].content)
     }
 
     @Test
@@ -329,5 +337,39 @@ class KadentAskerTest {
 
         assertEquals(AskOutcome.Unanswered(StopReason.END_TURN), KadentAsker(ai).ask("Why?", Household()))
         assertEquals(2, ai.sent.size)
+    }
+
+    @Test
+    fun aMonthOrDayThatIsNoDateIsAnErrorTheModelCanFix() = runTest {
+        val ai = Scripted(
+            listOf(
+                call("a", KadentAsker.SPENDING, "from_month" to "2026-13", "through_month" to "2026-13"),
+                call("b", KadentAsker.TAX_PAID, "from" to "2026-12-01", "through" to "2026-12-32"),
+            ),
+            listOf(answer("c", "Nothing.")),
+        )
+
+        KadentAsker(ai).ask("Next month?", Household())
+
+        val results = toolResults(ai, 1)
+        assertEquals(listOf(true, true), results.map { it.isError })
+        assertEquals("Not valid input for spending: from_month is a month, like 2026-10", results[0].content)
+        assertEquals("Not valid input for tax_paid: from and through are days, like 2026-10-28", results[1].content)
+    }
+
+    /** True when [text], written twice, is refused: sent back once, then refused. */
+    private suspend fun refused(text: String): Boolean {
+        val ai = Scripted(listOf(october), listOf(answer("b", text)), listOf(answer("c", text)))
+        return KadentAsker(ai).ask("Why?", Household()) is AskOutcome.Refused
+    }
+
+    @Test
+    fun anIdTheTextBendsOrMisspellsIsRefused() = runTest {
+        // Each would draw wrong: "$$148.62", "$148.62.50", a brace or an id shown as typed, a French amount.
+        for (text in listOf("October is \${f6}.", "October is {f6}.50.", "October is {F6}.", "October is { f6 }.", "October is f6.", "October is 148 $.")) {
+            assertTrue(refused(text), text)
+        }
+        // An id followed by a sentence's own punctuation is fine.
+        assertTrue(!refused("October is {f6}, so far. Groceries is {f3}."))
     }
 }
