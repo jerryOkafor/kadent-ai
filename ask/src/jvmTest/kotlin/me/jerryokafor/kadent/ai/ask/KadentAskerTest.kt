@@ -175,7 +175,7 @@ class KadentAskerTest {
 
         val request = ai.sent.single()
         assertEquals(listOf("receipts", "receipt_lines", "tax_paid", "sum", "difference", "answer"), request.tools!!.map { it.name })
-        assertEquals(ToolChoice.ANY, request.toolChoice)
+        assertEquals(ToolChoice.AUTO, request.toolChoice)
     }
 
     @Test

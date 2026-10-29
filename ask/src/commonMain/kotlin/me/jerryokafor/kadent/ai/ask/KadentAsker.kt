@@ -103,7 +103,9 @@ class KadentAsker(private val ai: AiClient, private val model: String = Models.S
             system = SYSTEM,
             messages = messages,
             tools = if (data.hasBudget) TOOLS else TOOLS.filter { it.name != SPENDING },
-            toolChoice = ToolChoice.ANY,
+            // Meta's API refuses every tool_choice but `auto` ("only `auto` is supported"), so the model
+            // may reply in text; the prompt says text is never shown, and a turn with no call ends Unanswered.
+            toolChoice = ToolChoice.AUTO,
             outputConfig = OutputConfig(effort = Effort.LOW),
         )
         var answered: Answer? = null
@@ -281,6 +283,7 @@ class KadentAsker(private val ai: AiClient, private val model: String = Models.S
         val SYSTEM = """
             You answer a Canadian household's questions about its own spending, receipts and tax, for a
             budgeting app. Read the household's data with the tools, then call answer exactly once.
+            Reply only by calling tools: text outside a tool call is never shown to the person.
 
             Rules
             - Every amount a tool returns comes with an id, like f3. In answer.text, write an amount only
