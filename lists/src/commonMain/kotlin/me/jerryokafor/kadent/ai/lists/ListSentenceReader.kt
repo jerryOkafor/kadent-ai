@@ -192,7 +192,8 @@ class ListSentenceReader(private val ai: AiClient, private val model: String = M
               even when the sentence words it differently ("milk" for "Milk 2%"). Otherwise item_id is
               null and name is the item as a shopper would write it on a list, capitalised: "Eggs".
             - aisle is one of the given aisles for a new item, or null when none fits.
-            - quantity is the number the sentence says, otherwise 1.
+            - quantity is how many the sentence counts ("3 avocados" is 3), otherwise 1. A weight or a
+              volume is not a count: "500 g of ground beef" is 1, with the weight left out of the name.
             - Put nothing on a list that the sentence did not ask for.
             - note: one short sentence when something could not be placed, such as a list the household
               does not have, otherwise null.
