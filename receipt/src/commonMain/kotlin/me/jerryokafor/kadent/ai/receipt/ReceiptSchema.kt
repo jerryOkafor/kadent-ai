@@ -50,9 +50,11 @@ object ReceiptSchema {
           the weighed number alone, "1.12", with its unit in unit_label.
         - code: the product code printed on the line, digits only. plu: a 4 or 5 digit produce
           sticker number printed with the item.
-        - Loblaw prints each product of one multi-buy on its own unpriced row, with a mark such as
-          (1) before its code, then one deal row, 2 @ 2/$5.00 5.00. That is one entry per product,
-          quantity 1, each at an even share of the deal's total, the last taking any odd cent.
+        - Loblaw prints each product of one multi-buy on its own unpriced row with its count in
+          brackets before its code, then one deal row: (1)06038300001 PC CRACKERS and
+          (1)06038300002 NN CHIPS over 2 @ 2/$5.00 5.00. Each product is one entry, quantity its
+          bracketed count, at its share of the deal's total by that count, so these two are 2.50
+          each, and (3)06038300003 PC EGGS over 3 @ $6.99 20.97 is one entry of three at 20.97.
         - A fuel pump receipt is one line: its till_text is the grade printed after Grade:
           (Regular, Premium, Diesel), and its price is the Fuel Sale amount. Its GST Included is a
           tax entry, and its subtotal is null.
