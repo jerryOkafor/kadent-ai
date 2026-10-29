@@ -36,11 +36,12 @@ beside the code that makes it.
 
 ```bash
 (cd functions && npm ci && npm test)            # the function's tests, no network, no emulator
-./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest :kadent-ai-planner:jvmTest :kadent-ai-lists:jvmTest :kadent-ai-ask:jvmTest     # the Kotlin tests, no network
+./gradlew :kadent-ai-client:jvmTest :kadent-ai-receipt:jvmTest :kadent-ai-planner:jvmTest :kadent-ai-lists:jvmTest :kadent-ai-ask:jvmTest :kadent-ai-notes:jvmTest     # the Kotlin tests, no network
 META_MODEL_API_KEY=... ./gradlew :kadent-ai-receipt:jvmTest --tests '*LiveReadingTest*'   # one real read; report in receipt/build/live-reading.txt
 META_MODEL_API_KEY=... ./gradlew :kadent-ai-planner:jvmTest --tests '*LivePlanningTest*'  # one real plan and revision; report in planner/build/live-planning.txt
 META_MODEL_API_KEY=... ./gradlew :kadent-ai-lists:jvmTest --tests '*LiveSentenceTest*'    # one real sentence; report in lists/build/live-sentence.txt
 META_MODEL_API_KEY=... ./gradlew :kadent-ai-ask:jvmTest --tests '*LiveAskTest*'            # ten real answers; report in ask/build/live-ask.txt
+META_MODEL_API_KEY=... ./gradlew :kadent-ai-notes:jvmTest --tests '*LiveNoteTest*'          # one real budget note; report in notes/build/live-note.txt
 ./gradlew publishToMavenLocal                   # what Kadent resolves the libraries from (~/.m2)
 gitleaks detect                                 # before every push
 ```
