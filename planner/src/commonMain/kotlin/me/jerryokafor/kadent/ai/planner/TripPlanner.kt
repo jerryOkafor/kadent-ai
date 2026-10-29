@@ -62,7 +62,9 @@ class PlanSession internal constructor(
  * the model gets another turn to fix it.
  *
  * Effort is low, as the receipt reader's is, because the reasoning counts in `max_tokens` and the person
- * is waiting. `tool_choice` is `any`, so every turn calls a tool and the loop ends at `propose_trip`.
+ * is waiting. `tool_choice` is `auto`, the only one Meta's API accepts (#309: `any` was refused on every
+ * request), so the prompt says text outside a tool call is never shown, and a turn with no call ends the
+ * loop as `Stopped`.
  */
 class TripPlanner(private val ai: AiClient, private val model: String = Models.SPARK) {
 
@@ -93,7 +95,7 @@ class TripPlanner(private val ai: AiClient, private val model: String = Models.S
             system = SYSTEM,
             messages = messages,
             tools = TOOLS,
-            toolChoice = ToolChoice.ANY,
+            toolChoice = ToolChoice.AUTO,
             outputConfig = OutputConfig(effort = Effort.LOW),
         )
         var proposed: ProposedTrip? = null
@@ -164,6 +166,7 @@ class TripPlanner(private val ai: AiClient, private val model: String = Models.S
         val SYSTEM = """
             You plan a Canadian household's next grocery trip for a budgeting app. Read the household's
             data with the tools, then call propose_trip exactly once with the draft.
+            Reply only by calling tools: text outside a tool call is never shown to the person.
 
             Rules
             - Call list_items first. Draft only rows it returns, by their id. Skip rows with on_trip true.
