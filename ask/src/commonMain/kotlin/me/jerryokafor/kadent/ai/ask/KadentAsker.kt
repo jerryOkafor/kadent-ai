@@ -67,8 +67,9 @@ class AskSession internal constructor(
  * and its text must hold no money of its own (`$12`, `12 dollars`). The first answer that fails is sent
  * back as an error, so the model can fix it; a second is [AskOutcome.Refused], and nothing is shown.
  *
- * Effort is low and `tool_choice` is `any`, as the trip planner's: every turn calls a tool, the person is
- * waiting, and the loop ends at `answer`.
+ * Effort is low, as the trip planner's, because the person is waiting. `tool_choice` is `auto`, the only
+ * one Meta's API accepts, so a turn may be text with no call: the loop then stops, nothing the model wrote
+ * is shown, and the question ends [AskOutcome.Unanswered]. The loop's normal end is `answer`.
  */
 class KadentAsker(private val ai: AiClient, private val model: String = Models.SPARK) {
 

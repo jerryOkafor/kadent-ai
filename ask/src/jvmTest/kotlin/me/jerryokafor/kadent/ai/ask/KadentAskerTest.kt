@@ -52,7 +52,9 @@ class KadentAskerTest {
         val sent = mutableListOf<MessagesRequest>()
         override suspend fun send(request: MessagesRequest): AiResult {
             sent += request
-            return AiResult.Answered(MessagesResponse("m", Models.SPARK, left.removeAt(0), StopReason.TOOL_USE, Usage(10, 5)))
+            val blocks = left.removeAt(0)
+            val stop = if (blocks.any { it is ContentBlock.ToolUse }) StopReason.TOOL_USE else StopReason.END_TURN
+            return AiResult.Answered(MessagesResponse("m", Models.SPARK, blocks, stop, Usage(10, 5)))
         }
     }
 
@@ -317,5 +319,15 @@ class KadentAskerTest {
         KadentAsker(ai).ask("Walmart?", nothing, onStep = { steps += it })
 
         assertEquals(AskStep(AskTool.RECEIPTS, "2026-10-01", "2026-10-28", null, 0), steps.single())
+    }
+
+    @Test
+    fun aReplyInTextWithNoToolCallIsUnansweredAndItsTextIsNeverShown() = runTest {
+        // `tool_choice` is `auto`, the only one Meta's API accepts, so the model may write instead of
+        // calling answer. That text could hold amounts nobody checked, so it ends the question unanswered.
+        val ai = Scripted(listOf(october), listOf(ContentBlock.Text("October was $253 higher.")))
+
+        assertEquals(AskOutcome.Unanswered(StopReason.END_TURN), KadentAsker(ai).ask("Why?", Household()))
+        assertEquals(2, ai.sent.size)
     }
 }
