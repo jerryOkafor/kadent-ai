@@ -101,6 +101,15 @@ sealed interface FigureSource {
     /** Every tax amount from [from] through [through]. */
     data class TaxTotal(val from: String, val through: String) : FigureSource
 
+    /**
+     * What [envelope] spent from [from] through [through], days rather than a month (#280's weeks), or every
+     * envelope the person sees when [envelopeId] is null.
+     */
+    data class Days(val envelopeId: String?, val envelope: String?, val from: String, val through: String) : FigureSource
+
+    /** What the [receipts] filed receipts at [store] dated [from] through [through] came to, as Budget counts them. */
+    data class Store(val store: String, val from: String, val through: String, val receipts: Int) : FigureSource
+
     /** The sum of [parts], under the model's own short [label]: "Snacks at Costco". */
     data class Sum(val label: String, val parts: List<Figure>) : FigureSource
 
